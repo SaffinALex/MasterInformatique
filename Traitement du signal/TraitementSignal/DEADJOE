@@ -1,0 +1,40 @@
+1 - A, B
+2 - B
+3 - A, D
+4 - C
+5 - A
+6 - A
+7 - Non vu en cours
+8 - Non vu en cours
+9 - Non vu en cours
+10 - A 
+11 - B 
+12 - B
+13 - B
+14 - A 
+15 - A
+16 - B 
+17 - A 
+18 - A, G 
+19 - C, A(?)
+20 - A, E
+21 - D
+22 - B
+23 - A, B, C, D, F
+24 - B
+25 - A
+26 - B
+27 -  E
+28 - D
+29 - A
+30 - A
+
+Pour la 4 : La réponse A n'a pas de sens, ça rendrais d'ailleurs l'utilisation d'un seul sémaphore impossible.
+Pour la 10 : On est sur le cas d'un serveur itératif, les clients ne sont pas traités simultanément mais les uns à la suite des autres. Même si ça peut être trés rapide, on est pas sur du simultané.
+Pour la 11 : Le Serveur peut dialoguer avec une Infinité de client au cours de sa vie . Mais il ne pourra pas traiter plus de 10 clients en même temps à cause du listen. (La question reste ambigu)
+Pour le 12 : Dans le cas de la fermeture de la socket sur laquelle on est en attente, on reçoit le caractére 0 (EOF), ce n'est pas considéré comme un erreur. On a d'ailleurs dû la traiter séparément dans nos serveurs TCP en TP.
+Pour le 14 : Même probléme que TCP, ce n'est pas possible on est sur un serveur itératif et non concurrent.
+Pour le 15 : Question ambigu, on parle de recevoir un "message" , effectivement si on met une taille incorrecte on reçoit quelque chose (et ça marche) mais ce n'est pas le message envoyé.
+Pour le 17 : A fonctionne aucune raison pour que ça ne fonctionne pas, IPC_CREAT Crée la file si elle n'existe pas et renvoie son ID, sinon elle renvoie juste l'id de la file existante. La B ne fonctionne pas car IPC_EXCL renvoie une erreur quand la file existe.
+
+

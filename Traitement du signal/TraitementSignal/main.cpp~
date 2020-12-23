@@ -1,0 +1,232 @@
+#include <iostream>
+#include <stdlib.h>
+#include <fstream>
+#include <math.h>
+#include "Wave.hpp"
+#include <iostream>
+#include <stdlib.h>
+#include <fstream>
+#include <math.h>
+#include "Wave.hpp"
+
+#define LA 440.00
+#define DO 261.00
+#define FREQ 44100
+
+void DFT(double *signal, double *partie_reelle, double *partie_imaginaire, int N){
+  std::fstream fs;
+  double somme1=0;
+  double somme2=0;
+  fs.open("data.txt", std::fstream::out);
+  double  s = 2.0*M_PI/(double)N;
+
+  for(int i = 0; i < N; i++){ //n = j , k = i
+    double  t = s*i;
+    somme1=0.0;
+    somme2=0.0;
+    for(int j = 0; j< N;j++){
+      somme1+=signal[j]*cos(t*j);
+      somme2-=signal[j]*sin(t*j);
+    }
+    partie_imaginaire[i] = somme2;
+    partie_reelle[i] = somme1;
+    
+    fs<<i/2<<" "<<partie_reelle[i]<<" "<<partie_imaginaire[i]<<std::endl;
+  }
+    
+  fs.close();
+}
+
+void IDFT(double *signal, double *partie_reelle, double *partie_imaginaire, int N){
+  double somme = 0;
+  for(int i = 0; i < N; i++){
+    for(int k = 0; k<N; k++){
+      somme += partie_reelle[k]*cos(2*M_PI*k*i/(double)N);
+      signal[i] = somme/(double)N;
+    }
+  }
+   
+}
+
+void convertReal(unsigned char* data8, double* signal, int N){
+  for(int i = 0; i < N; i++){
+    signal[i] = data8[i]/255.0 * 2 - 1;
+  }
+}
+void convertChar(unsigned char* data8, double* signal, int N){
+  for(int i = 0; i < N; i++){
+    data8[i] = signal[i]*255.0 / 2.0 + 1;
+  }
+}
+
+int char2real(char* s_char, double* s_real, int N){
+  int i;
+  char *ptc;
+  double *pt;
+  double *fin;
+  pt = s_real;
+  ptc = s_char;
+  fin = pt+N;
+  while(pt < fin){
+    (*pt++) = ((double)(*ptc)/127.5)-1.0;
+  }
+  return 1;
+}
+int real2char(char* s_char, double* s_real, int N){
+  int i;
+  char *ptc;
+  double *pt;
+  double *fin;
+  double* valeur;
+  pt = s_real;
+  ptc = s_char;
+  fin = pt+N;
+  while(pt < fin){
+    (*pt) *= 127.5;
+    (*pt) = (*pt) > 255.0 ? 255.0 : (*pt);
+    (*pt) = (*pt) < 0.0 ? 0.0 : (*pt);
+    (*ptc++) = (char) floor(*pt++);
+    
+  }
+  return 1;
+}
+
+void addNote(long int nb_donnee, int nbSeconde, int freqNote, int freq){
+
+
+}
+
+void createSound(int nbSeconde, int gamme){
+  unsigned char data8[nbSeconde*FREQ];
+  int nb_donnee = nbSeconde*FREQ;
+  int cpt = 0;
+  double signal[nb_donnee];
+  for(int i = 0 ; i < nb_donnee; i++){
+    data8[i] = 127 + 127 * cos(((double)i/(double)FREQ)*(double)M_PI*2*gamme);
+    cpt ++;
+  }
+  Wave *w = new Wave(data8,nb_donnee,1,FREQ);
+
+  int size;
+  double partie_imaginaire[nb_donnee];
+  double partie_reelle[nb_donnee];
+
+  w->write("sound.wav");
+  convertReal(data8, signal, nb_donnee);
+  //real2char((char*)data8, signal, nb_donnee);
+  DFT(signal, partie_reelle, partie_imaginaire, nb_donnee);
+
+  printf("coucou1\n");
+  IDFT(signal, partie_reelle, partie_imaginaire, nb_donnee);
+  printf("coucou2\n");
+  convertChar(data8, signal, nb_donnee);
+  w->write("soundAfter.wav");
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+//Faire fonction addNote
+//Transfo de Fourrier
+int main(int argc, char** argv){
+
+
+  createSound(2,LA);
+
+  return 0;
+}
+
+/*
+	This FFT has been proposed by Paul Bourke 
+	http://paulbourke.net/miscellaneous/dft/
+	This computes an in-place complex-to-complex FFT 
+	x and y are the real and imaginary arrays of 2^m points.
+	dir =  1 gives forward transform
+	dir = -1 gives reverse transform 
+	You MUST compute first the value m such that
+	2^(m-1) < n (size of your signal) <= 2^m
+	allocate a new signal of nm=2^m values
+	then fill the n first values of this new signal 
+ with your signal and fill the rest with 0
+	WARNING : you must pass m, not nm !!!
+	*/
+
+
+int FFT(int dir,int m,double *x,double *y)
+{
+	int n,i,i1,j,k,i2,l,l1,l2;
+	double c1,c2,tx,ty,t1,t2,u1,u2,z;
+	
+	/* Calculate the number of points */
+	n = 1;
+	for (i=0;i<m;i++) 
+		n *= 2;
+	
+	/* Do the bit reversal */
+	i2 = n >> 1;
+	j = 0;
+	for (i=0;i<n-1;i++) {
+		if (i < j) {
+			tx = x[i];
+			ty = y[i];
+			x[i] = x[j];
+			y[i] = y[j];
+			x[j] = tx;
+			y[j] = ty;
+		}
+		k = i2;
+		while (k <= j) {
+			j -= k;
+			k >>= 1;
+		}
+		j += k;
+	}
+	
+	/* Compute the FFT */
+	c1 = -1.0; 
+	c2 = 0.0;
+	l2 = 1;
+	for (l=0;l<m;l++) {
+		l1 = l2;
+		l2 <<= 1;
+		u1 = 1.0; 
+		u2 = 0.0;
+		for (j=0;j<l1;j++) {
+			for (i=j;i<n;i+=l2) {
+				i1 = i + l1;
+				t1 = u1 * x[i1] - u2 * y[i1];
+				t2 = u1 * y[i1] + u2 * x[i1];
+				x[i1] = x[i] - t1; 
+				y[i1] = y[i] - t2;
+				x[i] += t1;
+				y[i] += t2;
+			}
+			z =  u1 * c1 - u2 * c2;
+			u2 = u1 * c2 + u2 * c1;
+			u1 = z;
+		}
+		c2 = sqrt((1.0 - c1) / 2.0);
+		if (dir == 1) 
+			c2 = -c2;
+		c1 = sqrt((1.0 + c1) / 2.0);
+	}
+	
+	/* Scaling for forward transform */
+	if (dir == 1) {
+		for (i=0;i<n;i++) {
+			x[i] /= n;
+			y[i] /= n;
+		}
+	}
+	
+	return(1);
+}
