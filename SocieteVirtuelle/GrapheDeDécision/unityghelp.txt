@@ -1,0 +1,23 @@
+Quand click batiment : batiment.affichecanvas{
+
+canvas batiment = on
+
+si upgrade != null bouton upgrade.
+
+ajout habitant.
+
+text hab = nbrHab.count();
+description = description;
+}
+
+si croix canvas = false;
+         myButtonUpgrade = GetComponent<Button>(); // <-- you get access to the button component here
+ 
+         myButton.onClick.AddListener( () => {upgrade();} );
+myButtonDelete.onClick.AddListener( () => {delete();} );
+upgrade = function.upgrade()
+
+delete(){
+	canvas caché
+	.onClick.RemoveListener(delete());
+}
